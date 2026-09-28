@@ -32,12 +32,6 @@ defmodule Throttlebeam.KeyServer do
     {:noreply, Map.put(state, :timer_ref, ref)}
   end
 
-  @impl true
-  def handle_info({:run_debounced, fun}, state) do
-    fun.()
-    {:stop, :normal, state}
-  end
-
   # Throttle: run immediately on the leading edge if we're not
   # already inside a window, otherwise reject the call outright.
   @impl true
@@ -51,6 +45,15 @@ defmodule Throttlebeam.KeyServer do
         Process.send_after(self(), :window_expired, interval)
         {:reply, :executed, Map.put(state, :window_active?, true)}
     end
+  end
+
+  # Shutdown clauses: the debounced function has run after a full
+  # quiet period, or the throttle window has expired. Either way
+  # the server's job is done and it stops itself.
+  @impl true
+  def handle_info({:run_debounced, fun}, state) do
+    fun.()
+    {:stop, :normal, state}
   end
 
   @impl true
