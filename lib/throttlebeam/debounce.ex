@@ -8,17 +8,6 @@ defmodule Throttlebeam.Debounce do
   alias Throttlebeam.KeyServer
 
   def call(key, delay_ms, fun) when is_function(fun, 0) do
-    ensure_started(key)
-    GenServer.cast(KeyServer.via(key), {:debounce, fun, delay_ms})
-  end
-
-  defp ensure_started(key) do
-    case DynamicSupervisor.start_child(
-           Throttlebeam.DynamicSupervisor,
-           {KeyServer, key: key}
-         ) do
-      {:ok, _pid} -> :ok
-      {:error, {:already_started, _pid}} -> :ok
-    end
+    KeyServer.request(key, {:debounce, fun, delay_ms})
   end
 end

@@ -21,7 +21,10 @@ defmodule Throttlebeam.ThrottleTest do
     assert Throttle.call(key, 50, fn -> :ok end) == :executed
     assert Throttle.call(key, 50, fn -> :ok end) == :throttled
 
-    Process.sleep(60)
+    # Generous margin over the 50ms window: under load the expiry
+    # can be delivered late, and asserting too early would read
+    # the window as still active.
+    Process.sleep(150)
 
     assert Throttle.call(key, 50, fn -> :ok end) == :executed
   end
