@@ -5,9 +5,17 @@ defmodule Throttlebeam.MixProject do
     [
       app: :throttlebeam,
       version: "0.1.0",
-      elixir: "~> 1.20",
-      start_permanent: Mix.env() == :prod,
+      elixir: "~> 1.15",
+      description: "Keyed debounce and throttle primitives on OTP, no external dependencies.",
+      package: package(),
       deps: deps()
+    ]
+  end
+
+  defp package do
+    [
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/kiunye/throttlebeam"}
     ]
   end
 
