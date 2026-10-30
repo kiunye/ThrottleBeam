@@ -27,27 +27,10 @@ defmodule Throttlebeam.KeyServer do
   can race that shutdown and reach a process that dies before
   serving us. The request was then never processed (the server
   replies before it can stop), so it is safe to start a fresh
-  server and try again.
+  server and try again. Retries are capped, see `Throttlebeam.Keyed`.
   """
   def request(key, request) do
-    ensure_started(key)
-
-    GenServer.call(via(key), request)
-  catch
-    :exit, :noproc -> request(key, request)
-    :exit, {reason, _} when reason in [:noproc, :normal] -> request(key, request)
-  end
-
-  # Another caller winning the start_child race registers the key
-  # first; that is as good as having started it ourselves.
-  defp ensure_started(key) do
-    case DynamicSupervisor.start_child(
-           Throttlebeam.DynamicSupervisor,
-           {__MODULE__, key: key}
-         ) do
-      {:ok, _pid} -> :ok
-      {:error, {:already_started, _pid}} -> :ok
-    end
+    Throttlebeam.Keyed.call(__MODULE__, key, request)
   end
 
   @impl true
