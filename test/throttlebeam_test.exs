@@ -1,8 +1,9 @@
 defmodule ThrottlebeamTest do
-  use ExUnit.Case
-  doctest Throttlebeam
+  use ExUnit.Case, async: true
 
-  test "greets the world" do
-    assert Throttlebeam.hello() == :world
+  test "the application starts the registry, result store and key supervisor" do
+    assert is_pid(Process.whereis(Throttlebeam.Registry))
+    assert is_pid(Process.whereis(Throttlebeam.Idempotency.Store))
+    assert is_pid(Process.whereis(Throttlebeam.DynamicSupervisor))
   end
 end
